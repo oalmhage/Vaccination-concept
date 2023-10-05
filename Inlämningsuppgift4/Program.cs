@@ -17,12 +17,13 @@ namespace Vaccination
     }
     public class Program
     {
+        public static int availableDoses = 0;
         public static void Main()
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             Console.WriteLine("Huvudmeny: ");
             Console.WriteLine();
-            Console.WriteLine("Antal tillgängliga doser: ");
+            Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
             Console.WriteLine("Vaccinering under 18 år: ");
             Console.WriteLine("Indatafil: ");
             Console.WriteLine("Utdatafil: ");
@@ -50,7 +51,7 @@ namespace Vaccination
                 }
                 else if (option == 1)
                 {
-                    //VaccinQuantity();
+                    availableDoses = ChangeVaccineQuantity();
                 }
                 else if (option == 2)
                 {
@@ -73,7 +74,25 @@ namespace Vaccination
             }
         }
 
-        
+        public static int ChangeVaccineQuantity()
+        {
+            while (true)
+            {
+                Console.WriteLine("Ange nytt antal vaccindoser: ");
+                string userInput = Console.ReadLine();
+                try
+                {
+                    int newAvailableDoses = int.Parse(userInput);
+                    availableDoses = newAvailableDoses;
+                    Console.WriteLine("Antalet har ändrats.");
+                    return availableDoses;
+                }
+                catch
+                {
+                    Console.WriteLine("Någonting gick fel. Du måste skriva in en siffra för att ändra antalet.");
+                }
+            }
+        }
         // Create the lines that should be saved to a CSV file after creating the vaccination order.
         //
         // Parameters:
