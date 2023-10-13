@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.IO;
 
 namespace Vaccination
 {
@@ -19,6 +20,9 @@ namespace Vaccination
     {
         public static int availableDoses = 0;
         public static string aboveEighteen = "Nej";
+        private static string csvPath = @"C:\Windows\Temp\Personer.csv";
+        private static string inputFile = @"C:\Windows\Temp\Personer.csv";
+
 
         public static void Main()
         {
@@ -29,9 +33,9 @@ namespace Vaccination
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
                 Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
-                Console.WriteLine("Indatafil: ");
+                Console.WriteLine("Indatafil: " + inputFile) ;
                 Console.WriteLine("Utdatafil: ");
-
+                Console.WriteLine();
 
                 int option = ShowMenu("Vad vill du göra? ", new[]
                 {
@@ -61,7 +65,7 @@ namespace Vaccination
                 }
                 else if (option == 3)
                 {
-                    //InputFile();
+                    InputFile();
                 }
                 else if (option == 4)
                 {
@@ -114,6 +118,30 @@ namespace Vaccination
             }
             Console.Clear();
             return aboveEighteen;
+        }
+
+        public static string InputFile()
+        {
+            while (true)
+            {
+                Console.WriteLine("Ändra indatafil");
+                Console.WriteLine("__________");
+                Console.WriteLine("Ange ny sökväg: ");
+                string newInputFile = Console.ReadLine();
+
+                try 
+                {
+                    File.Exists(newInputFile);
+                    inputFile = newInputFile;
+                    Console.WriteLine("Indatafilen har ändrats till: " + newInputFile);
+                    return inputFile;
+                }
+                catch
+                {
+                    Console.WriteLine("Filen finns inte. Försök igen.");
+                }
+            }
+            
         }
 
         // Create the lines that should be saved to a CSV file after creating the vaccination order.
