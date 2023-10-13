@@ -9,7 +9,7 @@ namespace Vaccination
     public class Person
     {
         public string Name;
-        public string Age; 
+        public string Age;
         public bool WorksInHealthCare;
         public bool RiskGroup;
         public bool HasBeenInfected;
@@ -18,19 +18,21 @@ namespace Vaccination
     public class Program
     {
         public static int availableDoses = 0;
+        public static string aboveEighteen = "Nej";
+
         public static void Main()
         {
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-            Console.WriteLine("Huvudmeny: ");
-            Console.WriteLine();
-            Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
-            Console.WriteLine("Vaccinering under 18 år: ");
-            Console.WriteLine("Indatafil: ");
-            Console.WriteLine("Utdatafil: ");
-
             bool running = true;
             while (running)
             {
+                Console.WriteLine("Huvudmeny: ");
+                Console.WriteLine();
+                Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
+                Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
+                Console.WriteLine("Indatafil: ");
+                Console.WriteLine("Utdatafil: ");
+
+
                 int option = ShowMenu("Vad vill du göra? ", new[]
                 {
 
@@ -55,7 +57,7 @@ namespace Vaccination
                 }
                 else if (option == 2)
                 {
-                    //AgeLimit();
+                    AgeLimit();
                 }
                 else if (option == 3)
                 {
@@ -93,6 +95,27 @@ namespace Vaccination
                 }
             }
         }
+
+        public static string AgeLimit()
+        {
+            int option = ShowMenu("Ska personer under 18 år vaccineras?", new[]
+            {
+                "Ja",
+                "Nej,"
+            });
+
+            if (option == 0)
+            {
+                aboveEighteen = "Ja";
+            }
+            else if (option == 1)
+            {
+                aboveEighteen = "Nej";
+            }
+            Console.Clear();
+            return aboveEighteen;
+        }
+
         // Create the lines that should be saved to a CSV file after creating the vaccination order.
         //
         // Parameters:
