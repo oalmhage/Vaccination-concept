@@ -120,28 +120,42 @@ namespace Vaccination
             return aboveEighteen;
         }
 
-        public static string InputFile()
+        public static void InputFile()
         {
-            while (true)
-            {
-                Console.WriteLine("Ändra indatafil");
-                Console.WriteLine("__________");
-                Console.WriteLine("Ange ny sökväg: ");
-                string newInputFile = Console.ReadLine();
+            Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
+            string filePath = Console.ReadLine();
 
-                try 
-                {
-                    File.Exists(newInputFile);
-                    csvPath = newInputFile;
-                    Console.WriteLine("Indatafilen har ändrats till: " + newInputFile);
-                    return newInputFile;
-                }
-                catch
-                {
-                    Console.WriteLine("Filen finns inte. Försök igen.");
-                }
+            // Läs in data från filen
+            if (File.Exists(filePath))
+            {
+                string[] fileContents = File.ReadAllLines(filePath);
+
+                // Använd fileContents för att hantera indata från filen
+                // Till exempel, konvertera filens innehåll till ditt dataformat
             }
-            
+            else
+            {
+                Console.WriteLine("Filen existerar inte.");
+            }
+
+        }
+
+        public static void OutputFile()
+        {
+            Console.WriteLine("Ange sökvägen till den nya utdatafilen: ");
+            string filePath = Console.ReadLine();
+
+            // Skriv data till filen
+            try
+            {
+                // Exempel: Skriv en rad till filen
+                File.WriteAllText(filePath, "Detta är en testrad i utdatafilen.");
+                Console.WriteLine("Data har sparats i utdatafilen.");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("Ett fel uppstod vid skrivning till filen: " + e.Message);
+            }
         }
 
         // Create the lines that should be saved to a CSV file after creating the vaccination order.
