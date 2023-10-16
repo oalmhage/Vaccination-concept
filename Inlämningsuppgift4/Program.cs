@@ -20,8 +20,8 @@ namespace Vaccination
     {
         public static int availableDoses = 0;
         public static string aboveEighteen = "Nej";
-        private static string csvPath = @"C:\Windows\Temp\Personer.csv";
-        private static string inputFile = @"C:\Windows\Temp\Personer.csv";
+        public static string csvPath = @"C:\Windows\Temp\Personer.csv";
+        static List<Person> patients = new List<Person>();
 
 
         public static void Main()
@@ -33,7 +33,7 @@ namespace Vaccination
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
                 Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
-                Console.WriteLine("Indatafil: " + inputFile) ;
+                Console.WriteLine("Indatafil: " );
                 Console.WriteLine("Utdatafil: ");
                 Console.WriteLine();
 
@@ -132,9 +132,9 @@ namespace Vaccination
                 try 
                 {
                     File.Exists(newInputFile);
-                    inputFile = newInputFile;
+                    csvPath = newInputFile;
                     Console.WriteLine("Indatafilen har ändrats till: " + newInputFile);
-                    return inputFile;
+                    return newInputFile;
                 }
                 catch
                 {
