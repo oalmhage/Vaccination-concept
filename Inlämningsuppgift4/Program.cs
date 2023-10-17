@@ -128,8 +128,10 @@ namespace Vaccination
             {
                 if (File.Exists(filePath))
                 {
+                    string csvContent = File.ReadAllText(filePath);
                     csvPath= filePath;
                     Console.WriteLine("Indatafilen har uppdaterats till: " + csvPath);
+                    Console.WriteLine(csvContent);
                 }
                 else
                 {
@@ -137,9 +139,9 @@ namespace Vaccination
                 }
                     
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Ett fel uppstod vi updatering av sökvägen.");
+                Console.WriteLine("Ett fel uppstod vi updatering av sökvägen." + e.Message);
             }
 
         }
