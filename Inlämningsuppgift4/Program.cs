@@ -9,8 +9,9 @@ namespace Vaccination
 {
     public class Person
     {
-        public string Name;
-        public string Age;
+        public string PersonNummer;
+        public string FirstName;
+        public string LastName;
         public bool WorksInHealthCare;
         public bool RiskGroup;
         public bool HasBeenInfected;
@@ -20,7 +21,9 @@ namespace Vaccination
     {
         public static int availableDoses = 0;
         public static string aboveEighteen = "Nej";
-        public static string csvPath = @"C:\Windows\Temp\Patienter.csv";
+        public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
+        public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
+
         static List<Person> patients = new List<Person>();
 
 
@@ -33,7 +36,7 @@ namespace Vaccination
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
                 Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
-                Console.WriteLine("Indatafil: " + csvPath );
+                Console.WriteLine("Indatafil: " + csvInput );
                 Console.WriteLine("Utdatafil: ");
                 Console.WriteLine();
 
@@ -128,10 +131,10 @@ namespace Vaccination
             {
                 if (File.Exists(filePath))
                 {
-                    string csvContent = File.ReadAllText(filePath);
-                    csvPath= filePath;
-                    Console.WriteLine("Indatafilen har uppdaterats till: " + csvPath);
-                    Console.WriteLine(csvContent);
+
+                    csvInput= filePath;
+
+                    ProcessCSVData(filePath);
                 }
                 else
                 {
@@ -144,6 +147,34 @@ namespace Vaccination
                 Console.WriteLine("Ett fel uppstod vi updatering av sökvägen." + e.Message);
             }
 
+        }
+
+        public static void ProcessCSVData(string filePath)
+        {
+            string csvContent = File.ReadAllText(filePath);
+            string[] lines = csvContent.Split('\n');
+
+            foreach (string line in lines)
+            {
+                string[] values = line.Split(",");
+                string personNummer = values[0];
+                string lastName = values[1];
+                string firstName = values[2];
+                bool worksInHealthCare = bool.Parse(values[3]);
+                bool riskGroup = bool.Parse(values[4]);
+                bool hasBeenInfected = bool.Parse(values[5]);
+
+                Person person = new Person
+                {
+                    PersonNummer = personNummer,
+                    LastName = lastName,
+                    FirstName = firstName,
+                    WorksInHealthCare = worksInHealthCare,
+                    RiskGroup = riskGroup,
+                    HasBeenInfected = hasBeenInfected,
+                };
+                patients.Add(person);
+            }
         }
 
         public static void OutputFile()
