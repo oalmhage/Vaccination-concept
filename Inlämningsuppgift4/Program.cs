@@ -20,7 +20,7 @@ namespace Vaccination
     {
         public static int availableDoses = 0;
         public static string aboveEighteen = "Nej";
-        public static string csvPath = @"C:\Windows\Temp\Personer.csv";
+        public static string csvPath = @"C:\Windows\Temp\Patienter.csv";
         static List<Person> patients = new List<Person>();
 
 
@@ -33,7 +33,7 @@ namespace Vaccination
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
                 Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
-                Console.WriteLine("Indatafil: " );
+                Console.WriteLine("Indatafil: " + csvPath );
                 Console.WriteLine("Utdatafil: ");
                 Console.WriteLine();
 
@@ -124,18 +124,22 @@ namespace Vaccination
         {
             Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
             string filePath = Console.ReadLine();
-
-            // Läs in data från filen
-            if (File.Exists(filePath))
+            try
             {
-                string[] fileContents = File.ReadAllLines(filePath);
-
-                // Använd fileContents för att hantera indata från filen
-                // Till exempel, konvertera filens innehåll till ditt dataformat
+                if (File.Exists(filePath))
+                {
+                    csvPath= filePath;
+                    Console.WriteLine("Indatafilen har uppdaterats till: " + csvPath);
+                }
+                else
+                {
+                    Console.WriteLine("Filen existerar inte.");
+                }
+                    
             }
-            else
+            catch
             {
-                Console.WriteLine("Filen existerar inte.");
+                Console.WriteLine("Ett fel uppstod vi updatering av sökvägen.");
             }
 
         }
