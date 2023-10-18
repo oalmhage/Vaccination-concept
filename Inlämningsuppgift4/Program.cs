@@ -72,7 +72,7 @@ namespace Vaccination
                 }
                 else if (option == 4)
                 {
-                    //OutputFile();
+                    OutputFile();
                 }
                 else
                 {
@@ -179,19 +179,23 @@ namespace Vaccination
 
         public static void OutputFile()
         {
-            Console.WriteLine("Ange sökvägen till den nya utdatafilen: ");
+            Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
             string filePath = Console.ReadLine();
-
-            // Skriv data till filen
             try
             {
-                // Exempel: Skriv en rad till filen
-                File.WriteAllText(filePath, "Detta är en testrad i utdatafilen.");
-                Console.WriteLine("Data har sparats i utdatafilen.");
+                if (File.Exists(filePath))
+                {
+                    csvOutput = filePath;
+                }
+                else
+                {
+                    Console.WriteLine("Filen existerar inte.");
+                }
+
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                Console.WriteLine("Ett fel uppstod vid skrivning till filen: " + e.Message);
+                Console.WriteLine("Ett fel uppstod vi updatering av sökvägen." + e.Message);
             }
         }
 
