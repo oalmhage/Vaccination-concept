@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.IO;
 
@@ -9,9 +10,14 @@ namespace Vaccination
 {
     public class Person
     {
+<<<<<<< Updated upstream
         public string PersonNummer;
         public string FirstName;
         public string LastName;
+=======
+        public string Name;
+        public string Age;
+>>>>>>> Stashed changes
         public bool WorksInHealthCare;
         public bool RiskGroup;
         public bool HasBeenInfected;
@@ -20,25 +26,55 @@ namespace Vaccination
     public class Program
     {
         public static int availableDoses = 0;
+<<<<<<< Updated upstream
         public static string aboveEighteen = "Nej";
         public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
         public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
 
         static List<Person> patients = new List<Person>();
 
+=======
+<<<<<<< HEAD
+        public static string ageGranted = "Nej";
+=======
+        public static string aboveEighteen = "Nej";
+        public static string csvPath = @"C:\Windows\Temp\Personer.csv";
+        static List<Person> patients = new List<Person>();
+
+>>>>>>> fcfc9b937fd1455a7ec150c7a5ad1a4b30a6c963
+>>>>>>> Stashed changes
 
         public static void Main()
         {
             bool running = true;
             while (running)
             {
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            Console.WriteLine("Huvudmeny: ");
+            Console.WriteLine();
+            Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
+            Console.WriteLine("Vaccinering under 18 år: " + ageGranted);
+            Console.WriteLine("Indatafil: ");
+            Console.WriteLine("Utdatafil: ");
+=======
+>>>>>>> Stashed changes
                 Console.WriteLine("Huvudmeny: ");
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
                 Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
+<<<<<<< Updated upstream
                 Console.WriteLine("Indatafil: " + csvInput );
                 Console.WriteLine("Utdatafil: ");
                 Console.WriteLine();
+=======
+                Console.WriteLine("Indatafil: " );
+                Console.WriteLine("Utdatafil: ");
+                Console.WriteLine();
+>>>>>>> fcfc9b937fd1455a7ec150c7a5ad1a4b30a6c963
+>>>>>>> Stashed changes
 
                 int option = ShowMenu("Vad vill du göra? ", new[]
                 {
@@ -64,7 +100,15 @@ namespace Vaccination
                 }
                 else if (option == 2)
                 {
+<<<<<<< Updated upstream
                     AgeLimit();
+=======
+<<<<<<< HEAD
+                    ageGranted = AgeLimit();
+=======
+                    AgeLimit();
+>>>>>>> fcfc9b937fd1455a7ec150c7a5ad1a4b30a6c963
+>>>>>>> Stashed changes
                 }
                 else if (option == 3)
                 {
@@ -72,7 +116,7 @@ namespace Vaccination
                 }
                 else if (option == 4)
                 {
-                    //OutputFile();
+                    OutputFile();
                 }
                 else
                 {
@@ -105,14 +149,72 @@ namespace Vaccination
 
         public static string AgeLimit()
         {
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+            int option = ShowMenu("Ska vaccination gälla under 18?", new[]
+            {
+                "Ja",
+                "Nej",
+=======
+>>>>>>> Stashed changes
             int option = ShowMenu("Ska personer under 18 år vaccineras?", new[]
             {
                 "Ja",
                 "Nej,"
+<<<<<<< Updated upstream
+=======
+>>>>>>> fcfc9b937fd1455a7ec150c7a5ad1a4b30a6c963
+>>>>>>> Stashed changes
             });
 
             if (option == 0)
             {
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+                return "Ja";
+            }
+            else if (option == 1)
+            {
+                return "Nej";
+            }
+            Console.Clear();
+            return ageGranted;
+        }
+
+        public static void InputFile()
+        {
+            Console.WriteLine("Ange sökvägen till den nya indatafilen.");
+            string filePath = Console.ReadLine();
+
+            if (File.Exists(filePath))
+            {
+                string[] fileContents = File.ReadAllLines(filePath);
+            }
+            else
+            {
+                Console.WriteLine("Filen existerar inte");
+            }
+        }
+
+        public static void OutputFile()
+        {
+            Console.WriteLine("Ange sökvägen till den nya utdatafilen.");
+            string filePath = Console.ReadLine();
+
+            try
+            {
+                File.WriteAllText(filePath, "Detta är en testrad i utdatafilen.");
+                Console.WriteLine("Data har sparats i utdatafilen.");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("Ett fel uppstod vid skrivning till filen" + e.Message);
+            }
+        }
+=======
+>>>>>>> Stashed changes
                 aboveEighteen = "Ja";
             }
             else if (option == 1)
@@ -123,6 +225,7 @@ namespace Vaccination
             return aboveEighteen;
         }
 
+<<<<<<< Updated upstream
         public static void InputFile()
         {
             Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
@@ -195,6 +298,33 @@ namespace Vaccination
             }
         }
 
+=======
+        public static string InputFile()
+        {
+            while (true)
+            {
+                Console.WriteLine("Ändra indatafil");
+                Console.WriteLine("__________");
+                Console.WriteLine("Ange ny sökväg: ");
+                string newInputFile = Console.ReadLine();
+
+                try 
+                {
+                    File.Exists(newInputFile);
+                    csvPath = newInputFile;
+                    Console.WriteLine("Indatafilen har ändrats till: " + newInputFile);
+                    return newInputFile;
+                }
+                catch
+                {
+                    Console.WriteLine("Filen finns inte. Försök igen.");
+                }
+            }
+            
+        }
+
+>>>>>>> fcfc9b937fd1455a7ec150c7a5ad1a4b30a6c963
+>>>>>>> Stashed changes
         // Create the lines that should be saved to a CSV file after creating the vaccination order.
         //
         // Parameters:
