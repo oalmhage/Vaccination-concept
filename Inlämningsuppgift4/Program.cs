@@ -19,8 +19,8 @@ namespace Vaccination
     }
     public class Program
     {
-        public static int availableDoses = 0;
-        public static string aboveEighteen = "Nej";
+        public static int doses = 0;
+        public static bool vaccinateChildren = false;
         public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
         public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
 
@@ -34,10 +34,10 @@ namespace Vaccination
             {
                 Console.WriteLine("Huvudmeny: ");
                 Console.WriteLine();
-                Console.WriteLine("Antal tillgängliga doser: " + availableDoses);
-                Console.WriteLine("Vaccinering under 18 år: " + aboveEighteen);
+                Console.WriteLine("Antal tillgängliga doser: " + doses);
+                Console.WriteLine("Vaccinering under 18 år: " + (vaccinateChildren ? "Ja" : "Nej"));
                 Console.WriteLine("Indatafil: " + csvInput );
-                Console.WriteLine("Utdatafil: ");
+                Console.WriteLine("Utdatafil: " + csvOutput);
                 Console.WriteLine();
 
                 int option = ShowMenu("Vad vill du göra? ", new[]
@@ -60,7 +60,7 @@ namespace Vaccination
                 }
                 else if (option == 1)
                 {
-                    availableDoses = ChangeVaccineQuantity();
+                    doses = ChangeVaccineQuantity();
                 }
                 else if (option == 2)
                 {
@@ -92,9 +92,9 @@ namespace Vaccination
                 try
                 {
                     int newAvailableDoses = int.Parse(userInput);
-                    availableDoses = newAvailableDoses;
+                    doses = newAvailableDoses;
                     Console.WriteLine("Antalet har ändrats.");
-                    return availableDoses;
+                    return doses;
                 }
                 catch
                 {
@@ -103,24 +103,24 @@ namespace Vaccination
             }
         }
 
-        public static string AgeLimit()
+        public static bool AgeLimit()
         {
             int option = ShowMenu("Ska personer under 18 år vaccineras?", new[]
             {
                 "Ja",
-                "Nej,"
+                "Nej"
             });
 
             if (option == 0)
             {
-                aboveEighteen = "Ja";
+                vaccinateChildren = true;
             }
             else if (option == 1)
             {
-                aboveEighteen = "Nej";
+                vaccinateChildren = false;
             }
             Console.Clear();
-            return aboveEighteen;
+            return vaccinateChildren;
         }
 
         public static void InputFile()
@@ -131,10 +131,7 @@ namespace Vaccination
             {
                 if (File.Exists(filePath))
                 {
-
                     csvInput= filePath;
-
-                    ProcessCSVData(filePath);
                 }
                 else
                 {
