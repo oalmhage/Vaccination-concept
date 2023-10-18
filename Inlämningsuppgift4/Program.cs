@@ -56,7 +56,9 @@ namespace Vaccination
 
                 if (option == 0)
                 {
-                    //PriorityOrder();
+                    string[] input = File.ReadAllLines(csvInput);
+                    string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);
+                    File.WriteAllLines(csvOutput, outputLines);
                 }
                 else if (option == 1)
                 {
@@ -146,33 +148,31 @@ namespace Vaccination
 
         }
 
-        public static void ProcessCSVData(string filePath)
+        public static void ProcessCSVData(string[] input)
         {
-            string csvContent = File.ReadAllText(filePath);
-            string[] lines = csvContent.Split('\n');
-
-            foreach (string line in lines)
-            {
-                string[] values = line.Split(",");
-                string personNummer = values[0];
-                string lastName = values[1];
-                string firstName = values[2];
-                bool worksInHealthCare = bool.Parse(values[3]);
-                bool riskGroup = bool.Parse(values[4]);
-                bool hasBeenInfected = bool.Parse(values[5]);
-
-                Person person = new Person
+                //Ska möjligtvis inte använda lista, kanske array. Istället, skicka med input, loopa igenom den. 
+                foreach (string line in input)
                 {
-                    PersonNummer = personNummer,
-                    LastName = lastName,
-                    FirstName = firstName,
-                    WorksInHealthCare = worksInHealthCare,
-                    RiskGroup = riskGroup,
-                    HasBeenInfected = hasBeenInfected,
-                };
-                patients.Add(person);
-            }
-        }
+                    string[] values = line.Split(",");
+                    string personNummer = values[0];
+                    string lastName = values[1];
+                    string firstName = values[2];
+                    bool worksInHealthCare = bool.Parse(values[3]);
+                    bool riskGroup = bool.Parse(values[4]);
+                    bool hasBeenInfected = bool.Parse(values[5]);
+
+                    Person person = new Person
+                    {
+                        PersonNummer = personNummer,
+                        LastName = lastName,
+                        FirstName = firstName,
+                        WorksInHealthCare = worksInHealthCare,
+                        RiskGroup = riskGroup,
+                        HasBeenInfected = hasBeenInfected,
+                    };
+                    patients.Add(person);
+                }
+        }       
 
         public static void OutputFile()
         {
@@ -205,7 +205,8 @@ namespace Vaccination
         // vaccinateChildren: whether to vaccinate people younger than 18
         public static string[] CreateVaccinationOrder(string[] input, int doses, bool vaccinateChildren)
         {
-            // Replace with your own code.
+            //Vet ej om den ska vara där.
+            ProcessCSVData(input);
             return new string[0];
         }
 
