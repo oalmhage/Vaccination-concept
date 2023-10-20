@@ -12,9 +12,9 @@ namespace Vaccination
         public string PersonNummer;
         public string FirstName;
         public string LastName;
-        public bool WorksInHealthCare;
-        public bool RiskGroup;
-        public bool HasBeenInfected;
+        public int WorksInHealthCare;
+        public int RiskGroup;
+        public int HasBeenInfected;
         public int RequiredDoses;
     }
     public class Program
@@ -23,10 +23,6 @@ namespace Vaccination
         public static bool vaccinateChildren = false;
         public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
         public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
-
-        static List<Person> patients = new List<Person>();
-
-
         public static void Main()
         {
             bool running = true;
@@ -36,7 +32,7 @@ namespace Vaccination
                 Console.WriteLine();
                 Console.WriteLine("Antal tillgängliga doser: " + doses);
                 Console.WriteLine("Vaccinering under 18 år: " + (vaccinateChildren ? "Ja" : "Nej"));
-                Console.WriteLine("Indatafil: " + csvInput );
+                Console.WriteLine("Indatafil: " + csvInput);
                 Console.WriteLine("Utdatafil: " + csvOutput);
                 Console.WriteLine();
 
@@ -57,7 +53,7 @@ namespace Vaccination
                 if (option == 0)
                 {
                     string[] input = File.ReadAllLines(csvInput);
-                    string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);
+                    string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);                   
                     File.WriteAllLines(csvOutput, outputLines);
                 }
                 else if (option == 1)
@@ -104,7 +100,6 @@ namespace Vaccination
                 }
             }
         }
-
         public static bool AgeLimit()
         {
             int option = ShowMenu("Ska personer under 18 år vaccineras?", new[]
@@ -124,7 +119,6 @@ namespace Vaccination
             Console.Clear();
             return vaccinateChildren;
         }
-
         public static void InputFile()
         {
             Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
@@ -133,13 +127,13 @@ namespace Vaccination
             {
                 if (File.Exists(filePath))
                 {
-                    csvInput= filePath;
+                    csvInput = filePath;
                 }
                 else
                 {
                     Console.WriteLine("Filen existerar inte.");
                 }
-                    
+
             }
             catch (Exception e)
             {
@@ -147,33 +141,6 @@ namespace Vaccination
             }
 
         }
-
-        public static void ProcessCSVData(string[] input)
-        {
-                //Ska möjligtvis inte använda lista, kanske array. Istället, skicka med input, loopa igenom den. 
-                foreach (string line in input)
-                {
-                    string[] values = line.Split(",");
-                    string personNummer = values[0];
-                    string lastName = values[1];
-                    string firstName = values[2];
-                    bool worksInHealthCare = bool.Parse(values[3]);
-                    bool riskGroup = bool.Parse(values[4]);
-                    bool hasBeenInfected = bool.Parse(values[5]);
-
-                    Person person = new Person
-                    {
-                        PersonNummer = personNummer,
-                        LastName = lastName,
-                        FirstName = firstName,
-                        WorksInHealthCare = worksInHealthCare,
-                        RiskGroup = riskGroup,
-                        HasBeenInfected = hasBeenInfected,
-                    };
-                    patients.Add(person);
-                }
-        }       
-
         public static void OutputFile()
         {
             Console.WriteLine("Ange sökvägen till den nya indatafilen: ");
@@ -196,20 +163,85 @@ namespace Vaccination
             }
         }
 
-        // Create the lines that should be saved to a CSV file after creating the vaccination order.
-        //
-        // Parameters:
-        //
-        // input: the lines from a CSV file containing population information
-        // doses: the number of vaccine doses available
-        // vaccinateChildren: whether to vaccinate people younger than 18
         public static string[] CreateVaccinationOrder(string[] input, int doses, bool vaccinateChildren)
         {
-            //Vet ej om den ska vara där.
-            ProcessCSVData(input);
+            List<Person> patients = ProcessCSVData(input);
+            SortPatientList(patients);
+
+            //string[] outputLines = VaccinePrio(sortedPatients);
+            
             return new string[0];
         }
+        public static List<Person> ProcessCSVData(string[] input)
+        {
+            List<Person> patients = new List<Person>();
 
+            foreach (string line in input)
+            {
+                string[] values = line.Split(",");
+                string personNummer = values[0];
+                string lastName = values[1];
+                string firstName = values[2];
+                int worksInHealthCare = int.Parse(values[3]);
+                int riskGroup = int.Parse(values[4]);
+                int hasBeenInfected = int.Parse(values[5]);
+
+                if (personNummer.Length < 12)
+                {
+                    personNummer = "19" + personNummer;
+                }
+                if (!personNummer.Contains("-"))
+                {
+                    personNummer = personNummer.Insert(8, "-");
+                }
+
+                Person person = new Person
+                {
+                    PersonNummer = personNummer,
+                    LastName = lastName,
+                    FirstName = firstName,
+                    WorksInHealthCare = worksInHealthCare,
+                    RiskGroup = riskGroup,
+                    HasBeenInfected = hasBeenInfected,
+                };
+                patients.Add(person);
+                
+            }
+            return patients;
+        }
+        public static List<Person> SortPatientList(List<Person> patients)
+        {
+            var sortedPatients = patients
+            .OrderByDescending(p => p.WorksInHealthCare)
+            .ThenByDescending(p => CalculateExactAge(p.PersonNummer) >= 65)
+            .ThenByDescending(p => p.RiskGroup)
+            .ThenBy(p => p.PersonNummer) // Sortera övriga personer på personnummer om ingen prioritering gäller.
+            .ToList();
+
+            foreach (var person in sortedPatients)
+            {
+                Console.WriteLine($"{person.PersonNummer}," +
+                          $"{person.LastName}," +
+                          $"{person.FirstName}," +
+                          $"{person.WorksInHealthCare}," +                         
+                          $"{person.RiskGroup}");
+            }
+            return sortedPatients;
+        }
+        public static int CalculateExactAge (string personNummer)
+        {
+            int year = int.Parse(personNummer.Substring(0, 4));
+            int month = int.Parse(personNummer.Substring(4, 2));
+            int day = int.Parse(personNummer.Substring(6, 2));
+
+            DateTime birthDate = new DateTime(year, month, day);
+            DateTime currentDate = DateTime.Now;
+
+            int age = currentDate.Year - birthDate.Year;
+            if (currentDate < birthDate.AddYears(age)) age--;
+
+            return age;
+        }
         public static int ShowMenu(string prompt, IEnumerable<string> options)
         {
             if (options == null || options.Count() == 0)
