@@ -22,7 +22,7 @@ namespace Vaccination
         public static int doses = 0;
         public static bool vaccinateChildren = false;
         public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
-        public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
+        public static string csvOutput = @"C:\Windows\Temp\Vaccinationer\Vaccinationer.csv";
         public static void Main()
         {
             bool running = true;
@@ -163,15 +163,6 @@ namespace Vaccination
             }
         }
 
-        public static string[] CreateVaccinationOrder(string[] input, int doses, bool vaccinateChildren)
-        {
-            List<Person> patients = ProcessCSVData(input);
-            SortPatientList(patients);
-
-            //string[] outputLines = VaccinePrio(sortedPatients);
-            
-            return new string[0];
-        }
         public static List<Person> ProcessCSVData(string[] input)
         {
             List<Person> patients = new List<Person>();
@@ -218,14 +209,6 @@ namespace Vaccination
             .ThenBy(p => p.PersonNummer) // Sortera övriga personer på personnummer om ingen prioritering gäller.
             .ToList();
 
-            foreach (var person in sortedPatients)
-            {
-                Console.WriteLine($"{person.PersonNummer}," +
-                          $"{person.LastName}," +
-                          $"{person.FirstName}," +
-                          $"{person.WorksInHealthCare}," +                         
-                          $"{person.RiskGroup}");
-            }
             return sortedPatients;
         }
         public static int CalculateExactAge (string personNummer)
@@ -238,9 +221,73 @@ namespace Vaccination
             DateTime currentDate = DateTime.Now;
 
             int age = currentDate.Year - birthDate.Year;
-            if (currentDate < birthDate.AddYears(age)) age--;
-
+            if (currentDate < birthDate.AddYears(age))
+            {
+                age--;
+            }
             return age;
+        }
+        public static string[] CreateVaccinationOrder(string[] input, int doses, bool vaccinateChildren)
+        {
+            List<Person> patients = ProcessCSVData(input);
+            List <Person> sortedPatients = SortPatientList(patients);
+
+            List<string> outputLines = new List<string>();
+            int remainingDoses = doses;
+
+            for (int i = 0; i < sortedPatients.Count; i++)
+            {
+                Person person = sortedPatients[i];
+
+                // Kontrollera om personen är yngre än 18 och om vaccinering av barn inte är aktiverad.
+                if (!vaccinateChildren && CalculateExactAge(person.PersonNummer) < 18)
+                {
+                    continue; // Gå vidare till nästa person om barnvaccination inte är aktiverad.
+                }
+
+                int requiredDoses = (person.HasBeenInfected == 1) ? 1 : 2;
+
+                if (requiredDoses > remainingDoses)
+                {
+                    // Om det inte finns tillräckligt med doser för den nuvarande personen, avsluta loopen.
+                    break;
+                }
+
+                if (requiredDoses == 2 && remainingDoses == 1)
+                {
+                    // Om det enbart finns 1 dos kvar och nästa person kräver 2 doser, leta efter en person som behöver 1 dos.
+                    // Loopa igenom resten av personerna för att hitta en som behöver 1 dos.
+                    bool foundOneDosePerson = false;
+                    for (int j = i + 1; j < sortedPatients.Count; j++)
+                    {
+                        Person nextPerson = sortedPatients[j];
+                        if ((nextPerson.HasBeenInfected == 1 ? 1 : 2) == 1)
+                        {
+                            // Hittade en person som behöver 1 dos, använd den sista dosen för att vaccinera den personen.
+                            requiredDoses = 1;
+                            foundOneDosePerson = true;
+                            i = j; // Sätt 'i' till nästa person för att undvika dubbelräkning.
+                            break;
+                        }
+                    }
+
+                    if (!foundOneDosePerson)
+                    {
+                        // Om ingen person som behöver 1 dos hittas, avsluta loopen.
+                        break;
+                    }
+                }
+
+                // Skapa en rad för vaccinering med personuppgifter och antal doser.
+                string outputLine = $"{person.PersonNummer},{person.LastName},{person.FirstName},{requiredDoses}";
+                outputLines.Add(outputLine);
+
+                // Minska antalet tillgängliga doser med de använda doserna.
+                remainingDoses -= requiredDoses;
+            }
+
+
+            return outputLines.ToArray();
         }
         public static int ShowMenu(string prompt, IEnumerable<string> options)
         {
