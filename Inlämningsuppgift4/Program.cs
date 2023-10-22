@@ -55,6 +55,8 @@ namespace Vaccination
                     string[] input = File.ReadAllLines(csvInput);
                     string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);                   
                     File.WriteAllLines(csvOutput, outputLines);
+                    Console.Clear();
+                    Console.WriteLine("Din prioritetsordning har skapats i " + csvOutput);
                 }
                 else if (option == 1)
                 {
@@ -249,8 +251,9 @@ namespace Vaccination
 
                 if (requiredDoses > remainingDoses)
                 {
-                    // Om det inte finns tillräckligt med doser för den nuvarande personen, avsluta loopen.
-                    break;
+                    //Om den nuvarande personen behöver 2 doser och det endast finns 1 kvar, gå vidare till
+                    //nästa person som behöver 1 dos
+                    continue;
                 }
 
                 if (requiredDoses == 2 && remainingDoses == 1)
@@ -285,7 +288,6 @@ namespace Vaccination
                 // Minska antalet tillgängliga doser med de använda doserna.
                 remainingDoses -= requiredDoses;
             }
-
 
             return outputLines.ToArray();
         }
