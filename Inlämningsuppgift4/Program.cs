@@ -499,13 +499,13 @@ namespace Vaccination
     public class ProgramTests
     {
         [TestMethod]
-        public void vaccinateChildrenFalse()
+        public void VaccinateChildrenFalse()
         {
             string[] input =
             {
                 "800731-7777, Potter, Harry, 0, 0, 0",
                 "800605-6666, Malfoy, Draco, 0, 0, 0",
-                "20060913-1313, Albus, Potter, 0, 0, 0",
+                "20060913-1313, Potter, Albus, 0, 0, 0",
                 "19800730-9876, Weasley, Ronald, 0, 0, 0",
                 "491030-3030, Weasley, Molly, 0, 1, 1",
                 "490914-4040, Weasley, Arthur, 0, 1, 1"
@@ -524,13 +524,13 @@ namespace Vaccination
         }
 
         [TestMethod]
-        public void vaccinateChildrenTrue()
+        public void VaccinateChildrenTrue()
         {
             string[] input =
             {
                 "800731-7777, Potter, Harry, 0, 0, 0",
                 "800605-6666, Malfoy, Draco, 0, 0, 0",
-                "20060913-1313, Albus, Potter, 0, 0, 0",
+                "20060913-1313, Potter, Albus, 0, 0, 0",
                 "19800730-9876, Weasley, Ronald, 0, 0, 0",
                 "491030-3030, Weasley, Molly, 0, 1, 1",
                 "490914-4040, Weasley, Arthur, 0, 1, 1"
@@ -546,17 +546,17 @@ namespace Vaccination
             Assert.AreEqual("19800605-6666, Malfoy, Draco,2", output[2]);
             Assert.AreEqual("19800730-9876, Weasley, Ronald,2", output[3]);
             Assert.AreEqual("19800731-7777, Potter, Harry,2", output[4]);
-            Assert.AreEqual("20060913-1313, Albus, Potter,2", output[5]);
+            Assert.AreEqual("20060913-1313, Potter, Albus,2", output[5]);
         }
 
         [TestMethod]
-        public void personnummerWithoutCorrectFormat()
+        public void PersonnummerWithoutCorrectFormat()
         {
             string[] input =
             {
                 "8007317777, Potter, Harry, 0, 0, 0",
                 "8006056666, Malfoy, Draco, 0, 0, 0",
-                "060913-1313, Albus, Potter, 0, 0, 0",
+                "060913-1313, Potter, Albus, 0, 0, 0",
                 "198007309876, Weasley, Ronald, 0, 0, 0",
                 "4910303030, Weasley, Molly, 0, 1, 1",
                 "4909144040, Weasley, Arthur, 0, 1, 1"
@@ -567,7 +567,7 @@ namespace Vaccination
             string[] output = Program.CreateVaccinationOrder(input, doses, vaccinateChildren);
 
             Assert.AreEqual(output.Length, 6);
-            Assert.AreEqual("19060913-1313, Albus, Potter,2", output[0]);
+            Assert.AreEqual("19060913-1313, Potter, Albus,2", output[0]);
             Assert.AreEqual("19490914-4040, Weasley, Arthur,1", output[1]);
             Assert.AreEqual("19491030-3030, Weasley, Molly,1", output[2]);
             Assert.AreEqual("19800605-6666, Malfoy, Draco,2", output[3]);
@@ -596,6 +596,32 @@ namespace Vaccination
             Assert.AreEqual("19580907-9999, White, Walter,1", output[1]);
             Assert.AreEqual("19700811-7777, White, Skylar,2", output[2]);
             Assert.AreEqual("19840924-8888, Pinkman, Jesse,1", output[3]);
+
+        }
+        [TestMethod]
+        public void NotEnoughDosesForAnyPatient()
+        {
+            string[] input =
+            {
+            "800731-7777, Potter, Harry, 0, 0, 0",
+            "800605-6666, Malfoy, Draco, 1, 0, 0",
+            "20060913-1313, Potter, Albus, 0, 0, 0",
+            "19800730-9876, Weasley, Ronald, 0, 0, 0",
+            "491030-3030, Weasley, Molly, 0, 1, 1",
+            "490914-4040, Weasley, Arthur, 0, 1, 1"
+            };
+            int doses = 20;
+            bool vaccinateChildren = true;
+
+            string[] output = Program.CreateVaccinationOrder(input, doses, vaccinateChildren);
+
+            Assert.AreEqual(output.Length, 6);
+            Assert.AreEqual("19800605-6666, Malfoy, Draco,2", output[0]);
+            Assert.AreEqual("19490914-4040, Weasley, Arthur,1", output[1]);
+            Assert.AreEqual("19491030-3030, Weasley, Molly,1", output[2]);
+            Assert.AreEqual("19800730-9876, Weasley, Ronald,2", output[3]);
+            Assert.AreEqual("19800731-7777, Potter, Harry,2", output[4]);
+            Assert.AreEqual("20060913-1313, Potter, Albus,2", output[5]);
 
         }
 
