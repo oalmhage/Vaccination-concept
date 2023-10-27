@@ -53,13 +53,14 @@ namespace Vaccination
 
                 if (option == 0)
                 {
-                    
+
                     string[] input = File.ReadAllLines(csvInput);
-                    bool hasErrors = CheckForErrors(input);
+                    bool hasErrors = SearchForErrors(input);
 
                     if (hasErrors)
                     {
                         Console.WriteLine("Det har uppstått felaktiga rader i CSV-filen. Försök igen.");
+                        
                     }
                     else
                     {
@@ -90,48 +91,52 @@ namespace Vaccination
                 Console.WriteLine();
             }
         }
-        public static bool CheckForErrors(string[] input)
+        public static bool SearchForErrors(string[] input)
         {
             List<string> errorList = new List<string>();
+            bool hasErrors = false;
+
+            foreach (string line in input)
             {
-                foreach (string line in input)
-
-                    try
-                    {
-                        string[] values = line.Split(",");
-                        if (values.Length != 6 && !WrongOneOrZeroValues(values))
-                        {
-                            errorList.Add(line);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        errorList.Add(e.Message);
-                    }
-
-                if (errorList.Count > 0)
+                try
                 {
-                    foreach (string error in errorList)
+                    string[] values = line.Split(",");
+                    if (values.Length != 6 || InvalidFormat(values, errorList))
                     {
-                        Console.WriteLine(error);
+                        errorList.Add(line);
+                        hasErrors = true;
                     }
-                    //true om det finns felaktiga rader
-                    return true;
+                }
+                catch (Exception e)
+                {
+                    errorList.Add(e.Message);
                 }
             }
-            //false om det inte finns några felaktiga rader
+
+            if (hasErrors)
+            {
+                Console.WriteLine("Felaktiga rader i CSV-filen:");
+                foreach (string error in errorList)
+                {
+                    Console.WriteLine(error);
+                }
+                return true;
+            }
+
             return false;
         }
-        public static bool WrongOneOrZeroValues(string[] columns)
+        public static bool InvalidFormat(string[] values, List<string> errorList)
         {
-            for (int i = columns.Length - 3; i < columns.Length; i++)
+            bool hasErrors = false;
+            for (int i = values.Length - 3; i < values.Length; i++)
             {
-                if (columns[i] != "0" && columns[i] != "1")
+                if (!values[i].Contains("0") && !values[i].Contains("1"))
                 {
-                    return false;
+                   
+                    hasErrors = true;
                 }
             }
-            return true;
+            return hasErrors;
         }
         public static void VerifyFileToCreatePriority()
         {
@@ -193,6 +198,7 @@ namespace Vaccination
                 {
                     int newAvailableDoses = int.Parse(userInput);
                     doses = newAvailableDoses;
+                    Console.Clear();
                     Console.WriteLine("Antalet har ändrats.");
                     return doses;
                 }
@@ -379,8 +385,7 @@ namespace Vaccination
             {
                 Person person = sortedPatients[i];
 
-                // Kontrollera om personen är yngre än 18 och om vaccinering av barn inte är aktiverad.
-                if (!vaccinateChildren && CalculateExactAge(person.PersonNummer) < 18)
+                if (!vaccinateChildren && CalculateExactAge(person.PersonNummer) < 18) // Kontrollera om personen är yngre än 18 och om vaccinering av barn inte är aktiverad.
                 {
                     continue; // Gå vidare till nästa person om barnvaccination inte är aktiverad.
                 }
@@ -389,22 +394,17 @@ namespace Vaccination
 
                 if (requiredDoses > remainingDoses)
                 {
-                    //Om den nuvarande personen behöver 2 doser och det endast finns 1 kvar, gå vidare till
-                    //nästa person som behöver 1 dos
-                    continue;
+                    continue; //Om den nuvarande personen behöver 2 doser och det endast finns 1 kvar, gå vidare till nästa person som behöver 1 dos
                 }
 
-                if (requiredDoses == 2 && remainingDoses == 1)
+                if (requiredDoses == 2 && remainingDoses == 1) // Om det enbart finns 1 dos kvar och nästa person kräver 2 doser, leta efter en person som behöver 1 dos.
                 {
-                    // Om det enbart finns 1 dos kvar och nästa person kräver 2 doser, leta efter en person som behöver 1 dos.
-                    // Loopa igenom resten av personerna för att hitta en som behöver 1 dos.
                     bool oneDoseRequired = false;
-                    for (int j = i + 1; j < sortedPatients.Count; j++)
+                    for (int j = i + 1; j < sortedPatients.Count; j++) // Loopa igenom resten av personerna för att hitta en som behöver 1 dos.
                     {
                         Person nextPerson = sortedPatients[j];
-                        if ((nextPerson.HasBeenInfected == 1 ? 1 : 2) == 1)
+                        if ((nextPerson.HasBeenInfected == 1 ? 1 : 2) == 1) // Hittade en person som behöver 1 dos, använd den sista dosen för att vaccinera den personen.
                         {
-                            // Hittade en person som behöver 1 dos, använd den sista dosen för att vaccinera den personen.
                             requiredDoses = 1;
                             oneDoseRequired = true;
                             i = j; // Sätt 'i' till nästa person för att undvika dubbelräkning.
@@ -412,18 +412,15 @@ namespace Vaccination
                         }
                     }
 
-                    if (!oneDoseRequired)
+                    if (!oneDoseRequired) // Om ingen person som behöver 1 dos hittas, avsluta loopen.
                     {
-                        // Om ingen person som behöver 1 dos hittas, avsluta loopen.
                         break;
                     }
                 }
-                // Skapa en rad för vaccinering med personuppgifter och antal doser.
                 string outputLine = $"{person.PersonNummer},{person.LastName},{person.FirstName},{requiredDoses}";
-                outputLines.Add(outputLine);
+                outputLines.Add(outputLine); // Skapa en rad för vaccinering med personuppgifter och antal doser.
 
-                // Minska antalet tillgängliga doser med de använda doserna.
-                remainingDoses -= requiredDoses;
+                remainingDoses -= requiredDoses; // Minska antalet tillgängliga doser med de använda doserna.
             }
             return outputLines.ToArray();
         }
@@ -633,6 +630,30 @@ namespace Vaccination
             Assert.AreEqual("19800731-7777, Potter, Harry,2", output[4]);
             Assert.AreEqual("20060913-1313, Potter, Albus,2", output[5]);
 
+        }
+        [TestMethod]
+        public void OnlyOneDoseLeft()
+        {
+            string[] input =
+            {
+                "19580907-9999, White, Walter, 0, 1, 1",
+                "19840924-8888, Pinkman, Jesse, 0, 1, 1",
+                "19700811-7777, White, Skylar, 0, 1, 0",
+                "19720730-6666, Schrader, Marie, 1, 0, 1",
+                "19720102-5555, Schrader, Hank, 0, 0, 0",
+                "201008174444, White, Holly, 0, 0, 1"
+            };
+            int doses = 6;
+            bool vaccinateChildren = true;
+
+            string[] output = Program.CreateVaccinationOrder(input, doses, vaccinateChildren);
+
+            Assert.AreEqual(output.Length, 5);
+            Assert.AreEqual("19720730-6666, Schrader, Marie,1", output[0]);
+            Assert.AreEqual("19580907-9999, White, Walter,1", output[1]);
+            Assert.AreEqual("19700811-7777, White, Skylar,2", output[2]);
+            Assert.AreEqual("19840924-8888, Pinkman, Jesse,1", output[3]);
+            Assert.AreEqual("20100817-4444, White, Holly,1", output[4]);
         }
 
     }
