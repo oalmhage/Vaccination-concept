@@ -181,7 +181,7 @@ namespace Vaccination
                     break;
                 }
                 else if (!fileExists)
-                {
+                { ////här
                     Console.Clear();
                     Console.WriteLine("Utdatafilen existerar inte. Du måste ange en befintlig fil för att skapa prioritetsordningen.");
                     break;
