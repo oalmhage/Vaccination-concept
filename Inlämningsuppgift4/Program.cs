@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.IO;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 
 namespace Vaccination
 {
@@ -39,12 +40,12 @@ namespace Vaccination
                 int option = ShowMenu("Vad vill du göra? ", new[]
                 {
 
-                 "Skapa prioritetsordning",
-                 "Ändra antal vaccindoser",
-                 "Ändra åldersgräns",
-                 "Ändra indatafil",
-                 "Ändra utdatafill",
-                 "Avsluta",
+                    "Skapa prioritetsordning",
+                    "Ändra antal vaccindoser",
+                    "Ändra åldersgräns",
+                    "Ändra indatafil",
+                    "Ändra utdatafill",
+                    "Avsluta",
 
                });
 
@@ -52,6 +53,7 @@ namespace Vaccination
 
                 if (option == 0)
                 {
+                    
                     string[] input = File.ReadAllLines(csvInput);
                     bool hasErrors = CheckForErrors(input);
 
@@ -88,12 +90,12 @@ namespace Vaccination
                 Console.WriteLine();
             }
         }
-
         public static bool CheckForErrors(string[] input)
         {
             List<string> errorList = new List<string>();
             {
                 foreach (string line in input)
+
                     try
                     {
                         string[] values = line.Split(",");
@@ -101,22 +103,14 @@ namespace Vaccination
                         {
                             errorList.Add(line);
                         }
-
-
-
                     }
                     catch (Exception e)
                     {
                         errorList.Add(e.Message);
                     }
 
-
-
                 if (errorList.Count > 0)
                 {
-
-
-
                     foreach (string error in errorList)
                     {
                         Console.WriteLine(error);
@@ -150,9 +144,9 @@ namespace Vaccination
                 {
                     int confirmOption = ShowMenu("Utdatafilen är inte tom. Vill du skriva över den? ", new[]
                     {
-                                "Ja",
-                                "Nej",
-                            });
+                        "Ja",
+                        "Nej",
+                    });
 
                     if (confirmOption == 0)
                     {
@@ -327,21 +321,39 @@ namespace Vaccination
         }
         public static List<Person> SortPatientList(List<Person> patients)
         {
-            var sortedPatients = patients
-            .OrderByDescending(p => p.WorksInHealthCare)
-            .ThenByDescending(p => CalculateExactAge(p.PersonNummer) >= 65)
-            .ThenByDescending(p => p.RiskGroup)
-            .ThenBy(p => p.PersonNummer) // Sortera övriga personer på personnummer om ingen prioritering gäller.
-            .ToList();
+            var sortedPatients = patients;
+
+            var worksInHealthcarePriority = patients
+                .Where(p => p.WorksInHealthCare == 1)
+                .OrderByDescending(p => CalculateExactAge(p.PersonNummer))
+                .ToList();
+
+            var patientsOver65 = patients
+                .Where(p => CalculateExactAge(p.PersonNummer) >= 65 && p.WorksInHealthCare == 0)
+                .OrderByDescending(p => CalculateExactAge(p.PersonNummer))
+                .ToList();
+
+            var riskGroupPriority = patients
+                .Where(p => p.RiskGroup == 1 && p.WorksInHealthCare == 0 && CalculateExactAge(p.PersonNummer) < 65)
+                .OrderByDescending(p => CalculateExactAge(p.PersonNummer))
+                .ToList();
+
+            var restOfPriority = patients
+                .Where(p => p.WorksInHealthCare == 0 && p.RiskGroup == 0 && CalculateExactAge(p.PersonNummer) < 65)
+                .OrderBy(p => p.PersonNummer)
+                .ToList();
+
+            sortedPatients = worksInHealthcarePriority
+                .Concat(patientsOver65)
+                .Concat(riskGroupPriority)
+                .Concat(restOfPriority)
+                .ToList();
 
             return sortedPatients;
         }
         public static int CalculateExactAge(string personNummer)
         {
-
             int year = int.Parse(personNummer.Substring(0, 4));
-            year += + 19;
-
             int month = int.Parse(personNummer.Substring(4, 2));
             int day = int.Parse(personNummer.Substring(6, 2));
 
@@ -406,14 +418,12 @@ namespace Vaccination
                         break;
                     }
                 }
-
                 // Skapa en rad för vaccinering med personuppgifter och antal doser.
                 string outputLine = $"{person.PersonNummer},{person.LastName},{person.FirstName},{requiredDoses}";
                 outputLines.Add(outputLine);
 
                 // Minska antalet tillgängliga doser med de använda doserna.
                 remainingDoses -= requiredDoses;
-                Console.WriteLine(outputLine);
             }
             return outputLines.ToArray();
         }
@@ -576,7 +586,7 @@ namespace Vaccination
         }
 
         [TestMethod]
-        public void RemainingDosesIsLessThanRequiredDoses()
+        public void RequiredDosesIsLessThanRemainingDoses()
         {
             string[] input =
             {
@@ -599,7 +609,7 @@ namespace Vaccination
 
         }
         [TestMethod]
-        public void NotEnoughDosesForAnyPatient()
+        public void RemainingDosesIsLessThenRequiredDoses()
         {
             string[] input =
             {
