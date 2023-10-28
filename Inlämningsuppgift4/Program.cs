@@ -23,7 +23,7 @@ namespace Vaccination
         public static int doses = 0;
         public static bool vaccinateChildren = false;
         public static string csvInput = @"C:\Windows\Temp\Personer\Patienter.csv";
-        public static string csvOutput = @"C:\Windows\Temp\Vaccinationer\Vaccinationer.csv";
+        public static string csvOutput = @"C:\Windows\Temp\Personer\Vaccinationer.csv";
         public static void Main()
         {
             bool running = true;
@@ -64,7 +64,7 @@ namespace Vaccination
                     }
                     else
                     {
-                        VerifyFileToCreatePriority();
+                        VerifyFileToCreatePriority(input);
                     }
                 }
                 else if (option == 1)
@@ -138,14 +138,14 @@ namespace Vaccination
             }
             return hasErrors;
         }
-        public static void VerifyFileToCreatePriority()
+        public static void VerifyFileToCreatePriority(string[] input)
         {
             while (true)
             {
-                bool fileExists = File.Exists(csvOutput);
-                bool fileNotEmpty = fileExists && new FileInfo(csvOutput).Length > 0;
+                
+                bool fileNotEmpty = new FileInfo(csvOutput).Length > 0;
 
-                if (fileExists && fileNotEmpty)
+                if (fileNotEmpty)
                 {
                     int confirmOption = ShowMenu("Utdatafilen är inte tom. Vill du skriva över den? ", new[]
                     {
@@ -155,8 +155,7 @@ namespace Vaccination
 
                     if (confirmOption == 0)
                     {
-                        // Användaren har godkänt överwriting, fortsätt med att skapa prioritetsordningen.
-                        string[] input = File.ReadAllLines(csvInput);
+                        // Användaren har godkänt, fortsätt med att skapa prioritetsordningen.
                         string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);
                         File.WriteAllLines(csvOutput, outputLines);
                         Console.Clear();
@@ -167,25 +166,18 @@ namespace Vaccination
                     {
                         Console.Clear();
                         Console.WriteLine("Filen har inte skrivits över.");
-                        break; // Användaren har avbrutit, avsluta programmet.
+                        break; // Användaren har avbrutit överskrivningen
                     }
                 }
-                else if (fileExists && !fileNotEmpty)
+                else if (!fileNotEmpty)
                 {
                     // Filen finns men är tom, skapa prioritetsordningen direkt.
-                    string[] input = File.ReadAllLines(csvInput);
                     string[] outputLines = CreateVaccinationOrder(input, doses, vaccinateChildren);
                     File.WriteAllLines(csvOutput, outputLines);
                     Console.Clear();
                     Console.WriteLine("Din prioritetsordning har skapats i " + csvOutput);
                     break;
-                }
-                else if (!fileExists)
-                { ////här
-                    Console.Clear();
-                    Console.WriteLine("Utdatafilen existerar inte. Du måste ange en befintlig fil för att skapa prioritetsordningen.");
-                    break;
-                }
+                }  
             }
         }
         public static int ChangeVaccineQuantity()
@@ -260,31 +252,27 @@ namespace Vaccination
                 {
                     string directoryPath = Path.GetDirectoryName(filePath);
 
-                    // Kontrollera om mappen existerar eller kan skapas.
+                    // Kontrollera om mappen existerar
                     if (!Directory.Exists(directoryPath))
                     {
-                        throw new DirectoryNotFoundException("Mappen existerar inte.");
+                        throw new DirectoryNotFoundException();
                     }
 
                     // Om filen inte finns, skapa den.
                     if (!File.Exists(filePath))
                     {
                         File.Create(filePath).Close();
+                        Console.WriteLine("Din fil har skapats. ");
                     }
 
-                    //Uppdatera utdatafilens sökväg.
                     csvOutput = filePath;
                     break; // Avsluta loopen om allt är korrekt.
                 }
-                catch (DirectoryNotFoundException e)
+                catch (DirectoryNotFoundException)
                 {
-                    Console.WriteLine("Mappen existerar inte. Ange en giltig mapp." + e.Message);
+                    Console.WriteLine("Mappen du har angivit existerar inte. Ange en giltig mapp.");
                 }
 
-                catch (Exception e)
-                {
-                    Console.WriteLine("Ett oväntat fel uppstod vid uppdatering av sökvägen: " + e.Message);
-                }
             }
         }
 
@@ -385,42 +373,48 @@ namespace Vaccination
             {
                 Person person = sortedPatients[i];
 
-                if (!vaccinateChildren && CalculateExactAge(person.PersonNummer) < 18) // Kontrollera om personen är yngre än 18 och om vaccinering av barn inte är aktiverad.
+                if (!vaccinateChildren && CalculateExactAge(person.PersonNummer) < 18) 
                 {
-                    continue; // Gå vidare till nästa person om barnvaccination inte är aktiverad.
+                    // Gå vidare till nästa person om VaccinateChildren är false
+                    continue; 
                 }
 
                 int requiredDoses = (person.HasBeenInfected == 1) ? 1 : 2;
 
                 if (requiredDoses > remainingDoses)
                 {
-                    continue; //Om den nuvarande personen behöver 2 doser och det endast finns 1 kvar, gå vidare till nästa person som behöver 1 dos
+                    //Om den nuvarande personen behöver 2 doser och det endast finns 1 kvar
+                    //gå vidare till nästa person som behöver 1 dos
+                    continue; 
                 }
 
-                if (requiredDoses == 2 && remainingDoses == 1) // Om det enbart finns 1 dos kvar och nästa person kräver 2 doser, leta efter en person som behöver 1 dos.
+                if (requiredDoses == 2 && remainingDoses == 1) 
                 {
                     bool oneDoseRequired = false;
-                    for (int j = i + 1; j < sortedPatients.Count; j++) // Loopa igenom resten av personerna för att hitta en som behöver 1 dos.
+                    // Loopa igenom resten av personerna för att hitta en som behöver 1 dos.
+                    for (int j = i + 1; j < sortedPatients.Count; j++) 
                     {
                         Person nextPerson = sortedPatients[j];
-                        if ((nextPerson.HasBeenInfected == 1 ? 1 : 2) == 1) // Hittade en person som behöver 1 dos, använd den sista dosen för att vaccinera den personen.
+                        if ((nextPerson.HasBeenInfected == 1 ? 1 : 2) == 1) 
                         {
                             requiredDoses = 1;
                             oneDoseRequired = true;
-                            i = j; // Sätt 'i' till nästa person för att undvika dubbelräkning.
+                            // Sätt 'i' till nästa person för att undvika dubbelräkning.
+                            i = j; 
                             break;
                         }
                     }
 
-                    if (!oneDoseRequired) // Om ingen person som behöver 1 dos hittas, avsluta loopen.
+                    if (!oneDoseRequired) 
                     {
+                        // Om ingen person som behöver 1 dos hittas, avsluta loopen.
                         break;
                     }
                 }
                 string outputLine = $"{person.PersonNummer},{person.LastName},{person.FirstName},{requiredDoses}";
-                outputLines.Add(outputLine); // Skapa en rad för vaccinering med personuppgifter och antal doser.
+                outputLines.Add(outputLine); 
 
-                remainingDoses -= requiredDoses; // Minska antalet tillgängliga doser med de använda doserna.
+                remainingDoses -= requiredDoses; 
             }
             return outputLines.ToArray();
         }
