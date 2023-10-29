@@ -86,7 +86,7 @@ namespace Vaccination
                 else
                 {
                     running = false;
-                    Console.WriteLine("Hejdå!");
+                    Console.WriteLine("Hejdå! :)");
                 }
                 Console.WriteLine();
             }
@@ -115,7 +115,6 @@ namespace Vaccination
 
             if (hasErrors)
             {
-                Console.WriteLine("Felaktiga rader i CSV-filen:");
                 foreach (string error in errorList)
                 {
                     Console.WriteLine(error);
@@ -142,7 +141,15 @@ namespace Vaccination
         {
             while (true)
             {
-                
+                bool fileExists = File.Exists(csvOutput);
+                if (!fileExists)
+                { 
+                    Console.Clear();
+                    Console.WriteLine("Utdatafilen existerar inte. Du måste ange en befintlig mapp " +
+                        "eller fil för att skapa prioritetsordningen.");
+                    break;
+                }
+
                 bool fileNotEmpty = new FileInfo(csvOutput).Length > 0;
 
                 if (fileNotEmpty)
@@ -177,7 +184,8 @@ namespace Vaccination
                     Console.Clear();
                     Console.WriteLine("Din prioritetsordning har skapats i " + csvOutput);
                     break;
-                }  
+                }
+                
             }
         }
         public static int ChangeVaccineQuantity()
