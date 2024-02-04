@@ -1,4 +1,4 @@
-# Vaccination concept
+# Vaccinationprogram
 
 
 This program is a vaccination prioritization tool written in C#. 
